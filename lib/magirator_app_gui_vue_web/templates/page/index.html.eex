@@ -1,0 +1,8 @@
+<div id="mr">
+  <div id="login">
+    <input v-model="username">
+    <input v-model="password">
+  </div>
+  <button v-on:click="getToken"></button>
+  </br><span>{{token}}</span>
+</div>
