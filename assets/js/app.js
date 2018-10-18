@@ -12,17 +12,10 @@
 // If you no longer want to use a dependency, remember
 // to also remove its path from "config.paths.watched".
 import "phoenix_html"
-
-// import { Socket } from "phoenix"
 import axios from 'axios'
 import Vue from 'vue'
-// import { join } from "./datachannel"
-// import socket from "./socket"
-import { connect, init } from "./datasocket";
+import { init, join } from './datasocket'
 
-// let socket = new Socket("ws://localhost:4000/socket", {params: {}})
-
-// join( "x", "y")
 
 new Vue({
   el: '#mr',
@@ -33,7 +26,24 @@ new Vue({
     token: ""
   },
   methods: {
-    tryit: function(){console.log("test")},
+    login: function(){
+      console.log("login")
+      axios.get("http://localhost:4000/api/token/" + this.username + "/" + this.password)
+      .then(
+        response=> {
+          console.log(response)
+          if (response.data.result === "ok") {
+            console.log(response.data.token)
+            this.token = response.data.token
+            console.log(this.token)
+            this.socket = join(this.socket, this.token)
+          }
+          else {
+            console.log(response.data.result)
+          }
+        })
+      .catch(err=>console.log(err))
+    },
     joinData: function(){
 
       this.socket = undefined
@@ -69,15 +79,3 @@ new Vue({
 //
 // Local files can be imported directly using relative
 // paths "./socket" or full ones "web/static/js/socket".
-
-
-
-
-
-
-// let channel = socket.channel("app:xx", {})
-// channel.join()
-//   .receive("ok", resp => { console.log("Joined xx successfully", resp) })
-//   .receive("error", resp => { console.log("Unable to join xx", resp) })
-
-
