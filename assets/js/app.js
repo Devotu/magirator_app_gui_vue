@@ -11,66 +11,67 @@
 //
 // If you no longer want to use a dependency, remember
 // to also remove its path from "config.paths.watched".
-import "phoenix_html"
-import axios from 'axios'
+import 'phoenix_html'
+import { Socket } from 'phoenix'
 import Vue from 'vue'
-import { init, join } from './datasocket'
-
+import axios from 'axios'
 
 new Vue({
   el: '#mr',
   data: {
     socket: {},
-    username: 'Usery',
-    password: 'Pwdz',
-    token: ""
+    channel: {},
+    username: 'Adam',
+    password: 'Hemligt',
+    token: "",
+    feedback: ""
   },
   methods: {
-    login: function(){
-      console.log("login")
+    login: function() {
       axios.get("http://localhost:4000/api/token/" + this.username + "/" + this.password)
-      .then(
-        response=> {
-          console.log(response)
-          if (response.data.result === "ok") {
-            console.log(response.data.token)
-            this.token = response.data.token
-            console.log(this.token)
-            this.socket = join(this.socket, this.token)
-          }
-          else {
-            console.log(response.data.result)
-          }
-        })
-      .catch(err=>console.log(err))
+        .then(
+          response => {
+    
+            console.log(response)
+    
+            if (response.data.result === "ok") {
+              console.log(response.data.token)
+              let token = response.data.token
+    
+              this.socket = new Socket(
+                "ws://localhost:4000/socket",
+                {
+                  params: {
+                    token: token
+                  }
+                }
+              )
+    
+              this.socket.connect()
+    
+              this.socket.onError(() => {
+                console.log("error. disconnecting.")
+                socket.disconnect()
+                return null
+              })
+    
+              this.channel = this.socket.channel("app:xx", {})
+              this.channel.join()
+                .receive("ok", resp => { console.log("Joined successfully", resp) })
+                .receive("error", resp => { console.log("Unable to join", resp) })
+            }
+            else {
+              console.log(response.data.result)
+              return null
+            }
+    
+          })
+        .catch(err => console.log(err))
     },
-    joinData: function(){
+    tryit: function(){
 
-      this.socket = undefined
-      this.socket = init(this.username, this.password)
-
-      console.log("connecting")
-      this.socket.connect()
-
-      this.socket.onError( () => {
-        console.log("errorrrr. disconnecting.") 
-        this.socket.disconnect()
-       })
-    },
-    getToken: function(){
-      axios.get("http://localhost:4000/api/token/" + this.username + "/" + this.password)
-      .then(
-        response=> {
-          console.log(response)
-          if (response.data.result === "ok") {
-            console.log(response.data.token)
-            this.token = response.data.token
-          }
-          else {
-            console.log(response.data.result)
-          }
-        })
-      .catch(err=>console.log(err))
+      console.log("pushing")
+      this.channel.push("deck:list", { x: "y" })
     }
   }
 });

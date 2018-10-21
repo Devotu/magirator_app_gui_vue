@@ -3,6 +3,8 @@
     <input v-model="username">
     <input v-model="password">
   </div>
-  <button v-on:click="login"></button>
+  <button v-on:click="login">Login</button>
+  <button v-on:click="tryit">Tryit</button>
+  </br><span>{{feedback}}</span>
   </br><span>{{token}}</span>
 </div>
