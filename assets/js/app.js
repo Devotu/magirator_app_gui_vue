@@ -16,11 +16,27 @@ import { Socket } from 'phoenix'
 import Vue from 'vue'
 import axios from 'axios'
 
+//Globaly available channel
+Vue.prototype.$appChannel = null
+
+Vue.mixin({
+  data: function() {
+    return {
+      appChannel() {
+        return this.$appChannel;
+      }
+    }
+  }
+})
+
+//Contains all components
+import './components'
+
+
 new Vue({
   el: '#mr',
   data: {
     socket: {},
-    channel: {},
     username: 'Adam',
     password: 'Hemligt',
     token: "",
@@ -55,8 +71,8 @@ new Vue({
                 return null
               })
     
-              this.channel = this.socket.channel("app:xx", {})
-              this.channel.join()
+              this.$appChannel = this.socket.channel("app:xx", {})
+              this.$appChannel.join()
                 .receive("ok", resp => { console.log("Joined successfully", resp) })
                 .receive("error", resp => { console.log("Unable to join", resp) })
             }
@@ -71,7 +87,7 @@ new Vue({
     tryit: function(){
 
       console.log("pushing")
-      this.channel.push("deck:list", { x: "y" })
+      this.$appChannel.push("deck:list", { x: "y" })
     }
   }
 });
